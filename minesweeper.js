@@ -17,7 +17,8 @@ var init = function(){
               xCoord: i,
               yCoord: j,
               mine: false,
-              adjacentMines: 0
+              adjacentMines: 0,
+			  revealed: false
           };
           board[i].push(square);
       }
@@ -29,7 +30,7 @@ var init = function(){
 var insertMines = function(board) {
     for(var i = 0; i < xRange; i++){
         for(var j = 0; j < yRange; j++){
-            if(Math.random() < 0.25){
+            if(Math.random() < 0.10){
                 board[i][j].mine = true;
             }
         }
@@ -72,11 +73,30 @@ var boardWithMines = insertMines(blankBoard);
 var boardWithValues = determineAdjacentMines(boardWithMines);
 
 var reveal = function(xCoord, yCoord){
-	var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
-	var cell = boardWithValues[xCoord][yCoord];
-	clickedButton.innerHTML = cell.mine ? "X" : (cell.adjacentMines > 0 ? cell.adjacentMines : ".");
-	clickedButton.removeAttribute("onclick");
+	if(xCoord >= 0 && xCoord < xRange && yCoord >= 0 && yCoord < yRange){
+		var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
+		var cell = boardWithValues[xCoord][yCoord];
+		if(cell.revealed) return;
+		cell.revealed = true;
+		if(cell.mine){
+			clickedButton.innerHTML = "X";
+			endGame();
+		}
+		else if(cell.adjacentMines > 0){
+			clickedButton.innerHTML = cell.adjacentMines;
+		}
+		else{
+			clickedButton.innerHTML = ".";
+			reveal(xCoord, yCoord-1);
+			reveal(xCoord, yCoord+1);
+			reveal(xCoord-1, yCoord);
+			reveal(xCoord+1, yCoord);
+		}
+		clickedButton.removeAttribute("onclick");
+	}
 };
+
+var endGame = function(){};
 
 var writeBoardWithButtons = function(boardValues){
 	var board = document.createElement("table");
