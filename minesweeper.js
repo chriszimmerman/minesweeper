@@ -5,29 +5,6 @@ var square = {
     adjacentMines: 0
 };
 
-var printBoard = function(board){
-	for(var i = 0; i < board.length; i++){
-		var line = "";
-        for(var j = 0; j < board[i].length; j++){
-			if(board[i][j].mine){
-                line = line.concat("X ");
-			}
-			else if(board[i][j].adjacentMines === 0){
-				line = line.concat(". ");
-			}
-            else{
-                line = line.concat(board[i][j].adjacentMines + " ");
-            }
-		}
-		console.log(line);
-	}
-    console.log();
-};
-
-//create squares with xy coords
-// randomly make squares mines
-// determine how many mines are adjacent
-// wire underlying model to view
 var xRange = 10;
 var yRange = 10;
 
@@ -90,19 +67,18 @@ var isMine = function(board, xPos, yPos){
     return board[xPos][yPos].mine ? 1 : 0;
 }
 
-var foo = init();
-var boardWithMines = insertMines(foo);
-printBoard(boardWithMines);
+var blankBoard = init();
+var boardWithMines = insertMines(blankBoard);
 var boardWithValues = determineAdjacentMines(boardWithMines);
-printBoard(boardWithValues);
 
-var swapButtonWithLabel = function(xCoord, yCoord){
+var reveal = function(xCoord, yCoord){
 	var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
-	clickedButton.innerHTML = boardWithValues[xCoord][yCoord].adjacentMines;
+	var cell = boardWithValues[xCoord][yCoord];
+	clickedButton.innerHTML = cell.mine ? "X" : (cell.adjacentMines > 0 ? cell.adjacentMines : ".");
+	clickedButton.removeAttribute("onclick");
 };
 
 var writeBoardWithButtons = function(boardValues){
-
 	var board = document.createElement("table");
 	board.id = "board";
 	board.setAttribute("style", "border: 1px solid black;");
@@ -111,15 +87,15 @@ var writeBoardWithButtons = function(boardValues){
 		var row = document.createElement("tr");
 
 		for(var j = 0; j < yRange; j++){
-			var square = document.createElement("td");
-			square.setAttribute("style", "height: 20px; width: 20px;");
+			var cell= document.createElement("td");
+			cell.setAttribute("style", "height: 20px; width: 20px;");
 
-			var squareButton = document.createElement("label");
-			squareButton.id = "row" + i + "col" + j;
-			squareButton.setAttribute("style", "display: block; text-align: center; background-color: lightgray; height: 20px; width: 20px; border: 1px solid black;");
-			squareButton.setAttribute("onclick", "swapButtonWithLabel(" + i + ", " + j + ")");
-			square.appendChild(squareButton);
-			row.appendChild(square);
+			var square = document.createElement("label");
+			square.id = "row" + i + "col" + j;
+			square.setAttribute("style", "display: block; text-align: center; background-color: lightgray; height: 20px; width: 20px; border: 1px solid black;");
+			square.setAttribute("onclick", "reveal(" + i + ", " + j + ")");
+			cell.appendChild(square);
+			row.appendChild(cell);
 		}
 		board.appendChild(row);
 	}
