@@ -39,6 +39,27 @@ var insertMines = function(board) {
 };
 
 var determineAdjacentMines = function(board){
+	var getNumberOfMines = function(board, xPos, yPos){
+		var isMine = function(board, xPos, yPos){
+			if(xPos < 0 || xPos >= xRange){
+				return 0;
+			}
+			if(yPos < 0 || yPos >= yRange){
+				return 0;
+			}
+			return board[xPos][yPos].mine ? 1 : 0;
+		}
+
+		return isMine(board, xPos - 1, yPos - 1)
+			+ isMine(board, xPos, yPos - 1)
+			+ isMine(board, xPos + 1, yPos - 1)
+			+ isMine(board, xPos - 1, yPos)
+			+ isMine(board, xPos + 1, yPos)
+			+ isMine(board, xPos - 1, yPos + 1)
+			+ isMine(board, xPos, yPos + 1)
+			+ isMine(board, xPos + 1, yPos + 1);
+	};
+
   for(var i = 0; i < xRange; i++){
       for(var j = 0; j < yRange; j++){
           board[i][j].adjacentMines = getNumberOfMines(board, i, j);
@@ -46,27 +67,6 @@ var determineAdjacentMines = function(board){
   }
   return board;
 };
-
-var getNumberOfMines = function(board, xPos, yPos){
-    return isMine(board, xPos - 1, yPos - 1)
-        + isMine(board, xPos, yPos - 1)
-        + isMine(board, xPos + 1, yPos - 1)
-        + isMine(board, xPos - 1, yPos)
-        + isMine(board, xPos + 1, yPos)
-        + isMine(board, xPos - 1, yPos + 1)
-        + isMine(board, xPos, yPos + 1)
-        + isMine(board, xPos + 1, yPos + 1);
-};
-
-var isMine = function(board, xPos, yPos){
-    if(xPos < 0 || xPos >= xRange){
-        return 0;
-    }
-    if(yPos < 0 || yPos >= yRange){
-        return 0;
-    }
-    return board[xPos][yPos].mine ? 1 : 0;
-}
 
 var blankBoard = init();
 var boardWithMines = insertMines(blankBoard);
@@ -91,6 +91,7 @@ var reveal = function(xCoord, yCoord){
 			reveal(xCoord, yCoord+1);
 			reveal(xCoord-1, yCoord);
 			reveal(xCoord+1, yCoord);
+			//todo: reveal upper left, upper right, lower left, lower right
 		}
 		clickedButton.removeAttribute("onclick");
 	}
