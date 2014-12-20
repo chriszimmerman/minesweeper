@@ -87,11 +87,14 @@ var reveal = function(xCoord, yCoord){
 		}
 		else{
 			clickedButton.innerHTML = ".";
-			reveal(xCoord, yCoord-1);
-			reveal(xCoord, yCoord+1);
-			reveal(xCoord-1, yCoord);
-			reveal(xCoord+1, yCoord);
-			//todo: reveal upper left, upper right, lower left, lower right
+			reveal(xCoord, yCoord - 1);
+			reveal(xCoord, yCoord + 1);
+			reveal(xCoord - 1, yCoord - 1);
+			reveal(xCoord - 1, yCoord);
+			reveal(xCoord - 1, yCoord + 1);
+			reveal(xCoord + 1, yCoord - 1);
+			reveal(xCoord + 1, yCoord);
+			reveal(xCoord + 1, yCoord + 1);
 		}
 		clickedButton.removeAttribute("onclick");
 	}
