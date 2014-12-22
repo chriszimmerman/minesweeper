@@ -1,10 +1,3 @@
-var square = {
-    xCoord: 0,
-    yCoord: 0,
-    mine: false,
-    adjacentMines: 0
-};
-
 var xRange = 10;
 var yRange = 10;
 
@@ -80,7 +73,7 @@ var reveal = function(xCoord, yCoord){
 		cell.revealed = true;
 		if(cell.mine){
 			clickedButton.innerHTML = "X";
-			endGame();
+			clickedButton.style.backgroundColor = "red";
 		}
 		else if(cell.adjacentMines > 0){
 			clickedButton.innerHTML = cell.adjacentMines;
