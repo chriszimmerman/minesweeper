@@ -1,7 +1,7 @@
 var xRange = 10;
 var yRange = 10;
 
-var init = function(){  
+var initializeBoard = function(){  
   var board = [];
   for(var i = 0; i < xRange; i++){
       board.push([]);
@@ -97,6 +97,20 @@ var reveal = function(xCoord, yCoord){
 	}
 };
 
+var markAsMine = function(xCoord, yCoord){
+	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
+	squareToMark.setAttribute("style", "display: block; text-align: center; background-color: yellow; height: 20px; width: 20px; border: 1px solid black;");
+	squareToMark.onclick = null;
+	squareToMark.setAttribute("oncontextmenu", "markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
+};
+
+var markAsDefault = function(xCoord, yCoord){
+	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
+	squareToMark.setAttribute("style", "display: block; text-align: center; background-color: lightgray; height: 20px; width: 20px; border: 1px solid black;");
+	squareToMark.setAttribute("onclick", "reveal(" + xCoord + ", " + yCoord + ");");
+	squareToMark.setAttribute("oncontextmenu", "markAsMine(" + xCoord + ", " + yCoord + "); return false;");
+};
+
 var writeBoardWithButtons = function(boardValues){
 	var board = document.createElement("table");
 	board.id = "board";
@@ -112,7 +126,8 @@ var writeBoardWithButtons = function(boardValues){
 			var square = document.createElement("label");
 			square.id = "row" + i + "col" + j;
 			square.setAttribute("style", "display: block; text-align: center; background-color: lightgray; height: 20px; width: 20px; border: 1px solid black;");
-			square.setAttribute("onclick", "reveal(" + i + ", " + j + ")");
+			square.setAttribute("onclick", "reveal(" + i + ", " + j + ");");
+			square.setAttribute("oncontextmenu", "markAsMine(" + i + ", " + j + "); return false;");
 			cell.appendChild(square);
 			row.appendChild(cell);
 		}
@@ -122,7 +137,11 @@ var writeBoardWithButtons = function(boardValues){
 	document.body.appendChild(board);
 };
 
-var blankBoard = init();
+var statGame = function(){
+
+};
+
+var blankBoard = initializeBoard();
 var boardWithMines = insertMines(blankBoard);
 var boardWithValues = determineAdjacentMines(boardWithMines);
 writeBoardWithButtons(boardWithValues);
