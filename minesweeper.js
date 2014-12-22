@@ -33,7 +33,7 @@ var insertMines = function(board) {
 
 var determineAdjacentMines = function(board){
 	var getNumberOfMines = function(board, xPos, yPos){
-		var isMine = function(board, xPos, yPos){
+		var getMine = function(board, xPos, yPos){
 			if(xPos < 0 || xPos >= xRange){
 				return 0;
 			}
@@ -43,14 +43,14 @@ var determineAdjacentMines = function(board){
 			return board[xPos][yPos].mine ? 1 : 0;
 		}
 
-		return isMine(board, xPos - 1, yPos - 1)
-			+ isMine(board, xPos, yPos - 1)
-			+ isMine(board, xPos + 1, yPos - 1)
-			+ isMine(board, xPos - 1, yPos)
-			+ isMine(board, xPos + 1, yPos)
-			+ isMine(board, xPos - 1, yPos + 1)
-			+ isMine(board, xPos, yPos + 1)
-			+ isMine(board, xPos + 1, yPos + 1);
+		return getMine(board, xPos - 1, yPos - 1)
+			+ getMine(board, xPos, yPos - 1)
+			+ getMine(board, xPos + 1, yPos - 1)
+			+ getMine(board, xPos - 1, yPos)
+			+ getMine(board, xPos + 1, yPos)
+			+ getMine(board, xPos - 1, yPos + 1)
+			+ getMine(board, xPos, yPos + 1)
+			+ getMine(board, xPos + 1, yPos + 1);
 	};
 
   for(var i = 0; i < xRange; i++){
@@ -61,19 +61,23 @@ var determineAdjacentMines = function(board){
   return board;
 };
 
-var blankBoard = init();
-var boardWithMines = insertMines(blankBoard);
-var boardWithValues = determineAdjacentMines(boardWithMines);
-
 var reveal = function(xCoord, yCoord){
 	if(xCoord >= 0 && xCoord < xRange && yCoord >= 0 && yCoord < yRange){
 		var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
 		var cell = boardWithValues[xCoord][yCoord];
+
 		if(cell.revealed) return;
 		cell.revealed = true;
+
 		if(cell.mine){
 			clickedButton.innerHTML = "X";
 			clickedButton.style.backgroundColor = "red";
+
+			for(var i = 0; i < xRange; i++){
+				for(var j = 0; j < yRange; j++){
+					reveal(i,j);
+				}
+			}
 		}
 		else if(cell.adjacentMines > 0){
 			clickedButton.innerHTML = cell.adjacentMines;
@@ -92,8 +96,6 @@ var reveal = function(xCoord, yCoord){
 		clickedButton.removeAttribute("onclick");
 	}
 };
-
-var endGame = function(){};
 
 var writeBoardWithButtons = function(boardValues){
 	var board = document.createElement("table");
@@ -120,4 +122,7 @@ var writeBoardWithButtons = function(boardValues){
 	document.body.appendChild(board);
 };
 
+var blankBoard = init();
+var boardWithMines = insertMines(blankBoard);
+var boardWithValues = determineAdjacentMines(boardWithMines);
 writeBoardWithButtons(boardWithValues);
