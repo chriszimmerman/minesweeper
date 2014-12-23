@@ -104,6 +104,8 @@ var game = {
 
 		var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
 		squareToMark.setAttribute("style", "display: block; text-align: center; background-color: yellow; height: 20px; width: 20px; border: 1px solid black;");
+		//todo: research/ask on SO: why must I call setAttribute for onclick with a blank string instead of just setting it to null?
+		//ex: squareToMark.setAttribute = null;
 		squareToMark.setAttribute("onclick", "");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
 	},
