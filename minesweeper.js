@@ -145,12 +145,22 @@ var game = {
 		document.body.appendChild(board);
 	},
 
-	startGame: function(){
+	startGame: function() {
 		var blankBoard = this.initializeBoard();
 		var boardWithMines = this.insertMines(blankBoard);
 		this.boardWithValues = this.determineAdjacentMines(boardWithMines);
 		this.writeBoardWithButtons(this.boardWithValues);
-	}
+	},
+
+	endGame: function() {
+		var board = document.getElementById("board");
+		document.body.removeChild(board);
+	},
+
+	restartGame: function(){
+		this.endGame();
+		this.startGame();
+	},
 };
 
 game.startGame();
