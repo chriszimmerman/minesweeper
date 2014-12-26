@@ -99,11 +99,18 @@ var game = {
 		}
 	},
 
+		//todo: determine win condition. 
+		//if all spots that are mines are marked, the player wins?
+		//to enforce this, give a limit to how many squares a player can mark as a mine: the number of mines on the board
+		
+		//todo: when a square is automatically revealed, unmark it. Or have it so that the auto-reveal will ignore squares like that. hmm.
+
+
 	markAsMine: function(xCoord, yCoord){
 		if(this.boardWithValues[xCoord][yCoord].revealed) return;
 
 		var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
-		squareToMark.setAttribute("style", "display: block; text-align: center; background-color: yellow; height: 20px; width: 20px; border: 1px solid black;");
+		squareToMark.setAttribute("class", "marked-square");
 		//todo: research/ask on SO: why must I call setAttribute for onclick with a blank string instead of just setting it to null?
 		//ex: squareToMark.setAttribute = null;
 		squareToMark.setAttribute("onclick", "");
@@ -114,7 +121,7 @@ var game = {
 		if(this.boardWithValues[xCoord][yCoord].revealed) return;
 
 		var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
-		squareToMark.setAttribute("style", "display: block; text-align: center; background-color: lightgray; height: 20px; width: 20px; border: 1px solid black;");
+		squareToMark.setAttribute("class", "unmarked-square");
 		squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
 	},
@@ -133,7 +140,7 @@ var game = {
 
 				var square = document.createElement("label");
 				square.id = "row" + i + "col" + j;
-				square.setAttribute("style", "display: block; text-align: center; background-color: lightgray; height: 20px; width: 20px; border: 1px solid black;");
+				square.setAttribute("class", "unmarked-square");
 				square.setAttribute("onclick", "game.reveal(" + i + ", " + j + ");");
 				square.setAttribute("oncontextmenu", "game.markAsMine(" + i + ", " + j + "); return false;");
 				cell.appendChild(square);

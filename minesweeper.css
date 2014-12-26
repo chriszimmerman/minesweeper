@@ -1,0 +1,17 @@
+.marked-square {
+	display: block;
+   	text-align: center;
+   	background-color: yellow;
+   	height: 20px; 
+	width: 20px; 
+	border: 1px solid black;"
+}
+
+.unmarked-square {
+	display: block;
+   	text-align: center;
+   	background-color: lightgray;
+   	height: 20px; 
+	width: 20px; 
+	border: 1px solid black;"
+}
