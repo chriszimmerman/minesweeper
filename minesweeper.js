@@ -2,8 +2,10 @@ var game = {
 	xRange: 10,
 	yRange: 10,
 	boardWithValues: [],
+	minesToMark: 0,
 
 	initializeBoard: function(){  
+	  this.minesToMark = 0;	
 	  var board = [];
 	  for(var i = 0; i < this.xRange; i++){
 		  board.push([]);
@@ -27,6 +29,7 @@ var game = {
 			for(var j = 0; j < this.yRange; j++){
 				if(Math.random() < 0.10){
 					board[i][j].mine = true;
+					this.minesToMark++;
 				}
 			}
 		} 
@@ -108,6 +111,7 @@ var game = {
 
 	markAsMine: function(xCoord, yCoord){
 		if(this.boardWithValues[xCoord][yCoord].revealed) return;
+		if(this.minesToMark === 0) return;
 
 		var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
 		squareToMark.setAttribute("class", "marked-square");
@@ -115,6 +119,8 @@ var game = {
 		//ex: squareToMark.setAttribute = null;
 		squareToMark.setAttribute("onclick", "");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
+		this.minesToMark--;
+		this.updateMineLabel();
 	},
 
 	markAsDefault: function(xCoord, yCoord){
@@ -124,6 +130,8 @@ var game = {
 		squareToMark.setAttribute("class", "unmarked-square");
 		squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
+		this.minesToMark++;
+		this.updateMineLabel();
 	},
 
 	writeBoardWithButtons: function(boardValues){
@@ -152,10 +160,27 @@ var game = {
 		document.body.appendChild(board);
 	},
 
+	writeMineLabel: function() {
+		var minesLeftText = document.createElement("label");
+		minesLeftText.innerHTML = "Mines left to mark: ";
+		document.body.appendChild(minesLeftText);
+
+		var minesLeft = document.createElement("label");
+		minesLeft.id = "minesLeft";
+		minesLeft.innerHTML = this.minesToMark;
+		document.body.appendChild(minesLeft);
+	},
+
+	updateMineLabel: function() {
+		var minesLeft = document.getElementById("minesLeft");
+		minesLeft.innerHTML = this.minesToMark;
+	},
+
 	startGame: function() {
 		var blankBoard = this.initializeBoard();
 		var boardWithMines = this.insertMines(blankBoard);
 		this.boardWithValues = this.determineAdjacentMines(boardWithMines);
+		this.writeMineLabel();
 		this.writeBoardWithButtons(this.boardWithValues);
 	},
 
