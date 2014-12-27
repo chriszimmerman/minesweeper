@@ -162,6 +162,7 @@ var game = {
 
 	writeMineLabel: function() {
 		var minesLeftText = document.createElement("label");
+		minesLeftText.id = "minesLeftText";
 		minesLeftText.innerHTML = "Mines left to mark: ";
 		document.body.appendChild(minesLeftText);
 
@@ -185,6 +186,10 @@ var game = {
 	},
 
 	endGame: function() {
+		var minesLeftText = document.getElementById("minesLeftText");
+		document.body.removeChild(minesLeftText);
+		var minesLeft = document.getElementById("minesLeft");
+		document.body.removeChild(minesLeft);
 		var board = document.getElementById("board");
 		document.body.removeChild(board);
 	},
