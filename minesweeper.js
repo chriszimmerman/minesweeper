@@ -71,7 +71,7 @@ var game = {
 			var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
 			var cell = this.boardWithValues[xCoord][yCoord];
 
-			if(cell.revealed) return;
+			if(cell.revealed || clickedButton.className === "marked-square") return;
 			cell.revealed = true;
 
 			if(cell.mine){
@@ -98,6 +98,7 @@ var game = {
 				this.reveal(xCoord + 1, yCoord);
 				this.reveal(xCoord + 1, yCoord + 1);
 			}
+
 			clickedButton.removeAttribute("onclick");
 		}
 	},
