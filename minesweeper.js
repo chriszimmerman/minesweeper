@@ -76,7 +76,7 @@ var game = {
 
 			if(cell.mine){
 				clickedButton.innerHTML = "X";
-				clickedButton.style.backgroundColor = "red";
+				clickedButton.setAttribute("class", "mine-square");
 
 				for(var i = 0; i < this.xRange; i++){
 					for(var j = 0; j < this.yRange; j++){

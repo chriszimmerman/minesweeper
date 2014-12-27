@@ -15,3 +15,12 @@
 	width: 20px; 
 	border: 1px solid black;"
 }
+
+.mine-square {
+	display: block;
+   	text-align: center;
+   	background-color: red;
+   	height: 20px; 
+	width: 20px; 
+	border: 1px solid black;"
+}
