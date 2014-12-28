@@ -71,8 +71,14 @@ var game = {
 			var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
 			var cell = this.boardWithValues[xCoord][yCoord];
 
-			if(cell.revealed || clickedButton.className === "marked-square") return;
+			if(clickedButton.className === "marked-square"){
+				this.markAsDefault(xCoord, yCoord);
+				this.minesToMark++;	
+			}
+
+			if(cell.revealed) return;
 			cell.revealed = true;
+
 
 			if(cell.mine){
 				clickedButton.innerHTML = "X";
