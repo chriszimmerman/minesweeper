@@ -4,6 +4,28 @@ var game = {
 	boardWithValues: [],
 	minesToMark: 0,
 
+	startGame: function() {
+		var blankBoard = this.initializeBoard();
+		var boardWithMines = this.insertMines(blankBoard);
+		this.boardWithValues = this.determineAdjacentMines(boardWithMines);
+		this.writeMineLabel();
+		this.writeBoardWithButtons(this.boardWithValues);
+	},
+
+	endGame: function() {
+		var minesLeftText = document.getElementById("minesLeftText");
+		document.body.removeChild(minesLeftText);
+		var minesLeft = document.getElementById("minesLeft");
+		document.body.removeChild(minesLeft);
+		var board = document.getElementById("board");
+		document.body.removeChild(board);
+	},
+
+	restartGame: function(){
+		this.endGame();
+		this.startGame();
+	},
+
 	initializeBoard: function(){  
 	  this.minesToMark = 0;	
 	  var board = [];
@@ -57,13 +79,36 @@ var game = {
 	},
 
 	getMine: function(board, xPos, yPos){
-		if(xPos < 0 || xPos >= this.xRange){
-			return 0;
-		}
-		if(yPos < 0 || yPos >= this.yRange){
+		if(xPos < 0 || xPos >= this.xRange || yPos < 0 || yPos >= this.yRange){
 			return 0;
 		}
 		return board[xPos][yPos].mine ? 1 : 0;
+	},
+
+	writeBoardWithButtons: function(boardValues){
+		var board = document.createElement("table");
+		board.id = "board";
+		board.setAttribute("style", "border: 1px solid black;");
+
+		for(var i = 0; i < this.xRange; i++){
+			var row = document.createElement("tr");
+
+			for(var j = 0; j < this.yRange; j++){
+				var cell= document.createElement("td");
+				cell.setAttribute("style", "height: 20px; width: 20px;");
+
+				var square = document.createElement("label");
+				square.id = "row" + i + "col" + j;
+				square.setAttribute("class", "unmarked-square");
+				square.setAttribute("onclick", "game.reveal(" + i + ", " + j + ");");
+				square.setAttribute("oncontextmenu", "game.markAsMine(" + i + ", " + j + "); return false;");
+				cell.appendChild(square);
+				row.appendChild(cell);
+			}
+			board.appendChild(row);
+		}
+
+		document.body.appendChild(board);
 	},
 
 	reveal: function(xCoord, yCoord){
@@ -78,7 +123,6 @@ var game = {
 
 			if(cell.revealed) return;
 			cell.revealed = true;
-
 
 			if(cell.mine){
 				clickedButton.innerHTML = "X";
@@ -109,13 +153,6 @@ var game = {
 		}
 	},
 
-		//todo: determine win condition. 
-		//if all spots that are mines are marked, the player wins?
-		//to enforce this, give a limit to how many squares a player can mark as a mine: the number of mines on the board
-		
-		//todo: when a square is automatically revealed, unmark it. Or have it so that the auto-reveal will ignore squares like that. hmm.
-
-
 	markAsMine: function(xCoord, yCoord){
 		if(this.boardWithValues[xCoord][yCoord].revealed) return;
 		if(this.minesToMark === 0) return;
@@ -127,7 +164,8 @@ var game = {
 		squareToMark.setAttribute("onclick", "");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
 		this.minesToMark--;
-		this.updateMineLabel();
+		this.updateMinesLeft();
+		this.checkForWinCondition();
 	},
 
 	markAsDefault: function(xCoord, yCoord){
@@ -137,34 +175,29 @@ var game = {
 		squareToMark.setAttribute("class", "unmarked-square");
 		squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
+
 		this.minesToMark++;
-		this.updateMineLabel();
+		this.updateMinesLeft();
 	},
 
-	writeBoardWithButtons: function(boardValues){
-		var board = document.createElement("table");
-		board.id = "board";
-		board.setAttribute("style", "border: 1px solid black;");
-
+	checkForWinCondition: function(){
+		var win = true;
 		for(var i = 0; i < this.xRange; i++){
-			var row = document.createElement("tr");
-
 			for(var j = 0; j < this.yRange; j++){
-				var cell= document.createElement("td");
-				cell.setAttribute("style", "height: 20px; width: 20px;");
-
-				var square = document.createElement("label");
-				square.id = "row" + i + "col" + j;
-				square.setAttribute("class", "unmarked-square");
-				square.setAttribute("onclick", "game.reveal(" + i + ", " + j + ");");
-				square.setAttribute("oncontextmenu", "game.markAsMine(" + i + ", " + j + "); return false;");
-				cell.appendChild(square);
-				row.appendChild(cell);
+				var squareToInspect = document.getElementById("row" + i + "col" + j);
+				if(this.boardWithValues[i][j].mine && squareToInspect.className !== "marked-square"){
+					win = false;
+				}
 			}
-			board.appendChild(row);
 		}
 
-		document.body.appendChild(board);
+		if(win){
+			var minesLeftLabel = document.getElementById("minesLeftText");
+			minesLeftText.innerHTML = "YOU WIN!!"; 
+
+			var minesLeft = document.getElementById("minesLeft");
+			minesLeft.innerHTML = "";
+		}
 	},
 
 	writeMineLabel: function() {
@@ -179,31 +212,9 @@ var game = {
 		document.body.appendChild(minesLeft);
 	},
 
-	updateMineLabel: function() {
+	updateMinesLeft: function() {
 		var minesLeft = document.getElementById("minesLeft");
 		minesLeft.innerHTML = this.minesToMark;
-	},
-
-	startGame: function() {
-		var blankBoard = this.initializeBoard();
-		var boardWithMines = this.insertMines(blankBoard);
-		this.boardWithValues = this.determineAdjacentMines(boardWithMines);
-		this.writeMineLabel();
-		this.writeBoardWithButtons(this.boardWithValues);
-	},
-
-	endGame: function() {
-		var minesLeftText = document.getElementById("minesLeftText");
-		document.body.removeChild(minesLeftText);
-		var minesLeft = document.getElementById("minesLeft");
-		document.body.removeChild(minesLeft);
-		var board = document.getElementById("board");
-		document.body.removeChild(board);
-	},
-
-	restartGame: function(){
-		this.endGame();
-		this.startGame();
 	},
 };
 
