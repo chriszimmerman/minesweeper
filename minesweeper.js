@@ -197,6 +197,15 @@ var game = {
 
 			var minesLeft = document.getElementById("minesLeft");
 			minesLeft.innerHTML = "";
+
+			for(var i = 0; i < this.xRange; i++){
+				for(var j = 0; j < this.yRange; j++){
+					if(this.boardWithValues[i][j].mine){
+						var squareToInspect = document.getElementById("row" + i + "col" + j);
+						squareToInspect.className = "victory-square";
+					}
+				}
+			}
 		}
 	},
 
