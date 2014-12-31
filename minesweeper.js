@@ -1,3 +1,11 @@
+var Square = function(x,y){
+	this.xCoord = x;
+	this.yCoord = y;
+	this.mine = false;
+	this.adjacentMines = 0;
+	this.revealed = false;
+};
+
 var game = {
 	xRange: 10,
 	yRange: 10,
@@ -32,13 +40,7 @@ var game = {
 	  for(var i = 0; i < this.xRange; i++){
 		  board.push([]);
 		  for(var j = 0; j < this.yRange; j++){
-			  var square = {
-				  xCoord: i,
-				  yCoord: j,
-				  mine: false,
-				  adjacentMines: 0,
-				  revealed: false
-			  };
+			  var square = new Square(i,j);
 			  board[i].push(square);
 		  }
 	  }
