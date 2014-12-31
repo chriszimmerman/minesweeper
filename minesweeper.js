@@ -95,7 +95,6 @@ var game = {
 
 			for(var j = 0; j < this.yRange; j++){
 				var cell= document.createElement("td");
-				cell.setAttribute("style", "height: 20px; width: 20px;");
 
 				var square = document.createElement("label");
 				square.id = "row" + i + "col" + j;
