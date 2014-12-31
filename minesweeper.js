@@ -6,18 +6,72 @@ var Square = function(x,y){
 	this.revealed = false;
 };
 
+var Board = function(length, width){
+	this.xRange = length;
+	this.yRange = width;
+	this.grid = [];
+	this.minesToMark = 0;
+};
+
+Board.prototype.initializeBoard = function(){  
+	this.minesToMark = 0;	
+	for(var i = 0; i < this.xRange; i++){
+		this.grid.push([]);
+		for(var j = 0; j < this.yRange; j++){
+			var square = new Square(i,j);
+			this.grid[i].push(square);
+		}
+	}
+};
+
+Board.prototype.insertMines = function() {
+	for(var i = 0; i < this.xRange; i++){
+		for(var j = 0; j < this.yRange; j++){
+			if(Math.random() < 0.10){
+				this.grid[i][j].mine = true;
+				this.minesToMark++;
+			}
+		}
+	} 
+};
+
+Board.prototype.determineAdjacentMines = function(){
+	for(var i = 0; i < this.xRange; i++){
+		for(var j = 0; j < this.yRange; j++){
+			this.grid[i][j].adjacentMines = this.getNumberOfMines(i, j);
+		}
+	}
+};
+
+Board.prototype.getNumberOfMines = function(xPos, yPos){
+	return this.getMine( xPos - 1, yPos - 1)
+		+ this.getMine(xPos, yPos - 1)
+		+ this.getMine(xPos + 1, yPos - 1)
+		+ this.getMine(xPos - 1, yPos)
+		+ this.getMine(xPos + 1, yPos)
+		+ this.getMine(xPos - 1, yPos + 1)
+		+ this.getMine(xPos, yPos + 1)
+		+ this.getMine(xPos + 1, yPos + 1);
+};
+
+Board.prototype.getMine = function(xPos, yPos){
+	if(xPos < 0 || xPos >= this.xRange || yPos < 0 || yPos >= this.yRange){
+		return 0;
+	}
+	return this.grid[xPos][yPos].mine ? 1 : 0;
+};
+
 var game = {
 	xRange: 10,
 	yRange: 10,
-	boardWithValues: [],
-	minesToMark: 0,
 
 	startGame: function() {
-		var blankBoard = this.initializeBoard();
-		var boardWithMines = this.insertMines(blankBoard);
-		this.boardWithValues = this.determineAdjacentMines(boardWithMines);
+		this.board = new Board(10,10);
+		this.board.initializeBoard();
+		this.board.insertMines();
+		this.board.determineAdjacentMines();
 		this.writeMineLabel();
-		this.writeBoardWithButtons(this.boardWithValues);
+		this.writeBoardWithButtons();
 	},
 
 	endGame: function() {
@@ -34,60 +88,7 @@ var game = {
 		this.startGame();
 	},
 
-	initializeBoard: function(){  
-	  this.minesToMark = 0;	
-	  var board = [];
-	  for(var i = 0; i < this.xRange; i++){
-		  board.push([]);
-		  for(var j = 0; j < this.yRange; j++){
-			  var square = new Square(i,j);
-			  board[i].push(square);
-		  }
-	  }
-	  
-	  return board;
-	},
-
-	insertMines: function(board) {
-		for(var i = 0; i < this.xRange; i++){
-			for(var j = 0; j < this.yRange; j++){
-				if(Math.random() < 0.10){
-					board[i][j].mine = true;
-					this.minesToMark++;
-				}
-			}
-		} 
-		return board;
-	},
-
-	determineAdjacentMines: function(board){
-	  for(var i = 0; i < this.xRange; i++){
-		  for(var j = 0; j < this.yRange; j++){
-			  board[i][j].adjacentMines = this.getNumberOfMines(board, i, j);
-		  }
-	  }
-	  return board;
-	},
-
-	getNumberOfMines: function(board, xPos, yPos){
-		return this.getMine(board, xPos - 1, yPos - 1)
-			+ this.getMine(board, xPos, yPos - 1)
-			+ this.getMine(board, xPos + 1, yPos - 1)
-			+ this.getMine(board, xPos - 1, yPos)
-			+ this.getMine(board, xPos + 1, yPos)
-			+ this.getMine(board, xPos - 1, yPos + 1)
-			+ this.getMine(board, xPos, yPos + 1)
-			+ this.getMine(board, xPos + 1, yPos + 1);
-	},
-
-	getMine: function(board, xPos, yPos){
-		if(xPos < 0 || xPos >= this.xRange || yPos < 0 || yPos >= this.yRange){
-			return 0;
-		}
-		return board[xPos][yPos].mine ? 1 : 0;
-	},
-
-	writeBoardWithButtons: function(boardValues){
+	writeBoardWithButtons: function(){
 		var board = document.createElement("table");
 		board.id = "board";
 		board.setAttribute("style", "border: 1px solid black;");
@@ -96,7 +97,7 @@ var game = {
 			var row = document.createElement("tr");
 
 			for(var j = 0; j < this.yRange; j++){
-				var cell= document.createElement("td");
+				var cell = document.createElement("td");
 
 				var square = document.createElement("label");
 				square.id = "row" + i + "col" + j;
@@ -115,11 +116,11 @@ var game = {
 	reveal: function(xCoord, yCoord){
 		if(xCoord >= 0 && xCoord < this.xRange && yCoord >= 0 && yCoord < this.yRange){
 			var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
-			var cell = this.boardWithValues[xCoord][yCoord];
+			var cell = this.board.grid[xCoord][yCoord];
 
 			if(clickedButton.className === "marked-square"){
 				this.markAsDefault(xCoord, yCoord);
-				this.minesToMark++;	
+				this.board.minesToMark++;	
 			}
 
 			if(cell.revealed) return;
@@ -155,8 +156,8 @@ var game = {
 	},
 
 	markAsMine: function(xCoord, yCoord){
-		if(this.boardWithValues[xCoord][yCoord].revealed) return;
-		if(this.minesToMark === 0) return;
+		if(this.board.grid[xCoord][yCoord].revealed) return;
+		if(this.board.minesToMark === 0) return;
 
 		var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
 		squareToMark.setAttribute("class", "marked-square");
@@ -164,20 +165,20 @@ var game = {
 		//ex: squareToMark.setAttribute = null;
 		squareToMark.setAttribute("onclick", "");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
-		this.minesToMark--;
+		this.board.minesToMark--;
 		this.updateMinesLeft();
 		this.checkForWinCondition();
 	},
 
 	markAsDefault: function(xCoord, yCoord){
-		if(this.boardWithValues[xCoord][yCoord].revealed) return;
+		if(this.board.grid[xCoord][yCoord].revealed) return;
 
 		var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
 		squareToMark.setAttribute("class", "unmarked-square");
 		squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
 		squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
 
-		this.minesToMark++;
+		this.board.minesToMark++;
 		this.updateMinesLeft();
 	},
 
@@ -186,7 +187,7 @@ var game = {
 		for(var i = 0; i < this.xRange; i++){
 			for(var j = 0; j < this.yRange; j++){
 				var squareToInspect = document.getElementById("row" + i + "col" + j);
-				if(this.boardWithValues[i][j].mine && squareToInspect.className !== "marked-square"){
+				if(this.board.grid[i][j].mine && squareToInspect.className !== "marked-square"){
 					win = false;
 				}
 			}
@@ -201,7 +202,7 @@ var game = {
 
 			for(var i = 0; i < this.xRange; i++){
 				for(var j = 0; j < this.yRange; j++){
-					if(this.boardWithValues[i][j].mine){
+					if(this.board.grid[i][j].mine){
 						var squareToInspect = document.getElementById("row" + i + "col" + j);
 						squareToInspect.className = "victory-square";
 					}
@@ -218,13 +219,13 @@ var game = {
 
 		var minesLeft = document.createElement("label");
 		minesLeft.id = "minesLeft";
-		minesLeft.innerHTML = this.minesToMark;
+		minesLeft.innerHTML = this.board.minesToMark;
 		document.body.appendChild(minesLeft);
 	},
 
 	updateMinesLeft: function() {
 		var minesLeft = document.getElementById("minesLeft");
-		minesLeft.innerHTML = this.minesToMark;
+		minesLeft.innerHTML = this.board.minesToMark;
 	},
 };
 
