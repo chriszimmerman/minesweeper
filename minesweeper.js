@@ -62,9 +62,6 @@ Board.prototype.getMine = function(xPos, yPos){
 };
 
 var game = {
-	xRange: 10,
-	yRange: 10,
-
 	startGame: function() {
 		this.board = new Board(10,10);
 		this.board.initializeBoard();
@@ -93,10 +90,10 @@ var game = {
 		board.id = "board";
 		board.setAttribute("style", "border: 1px solid black;");
 
-		for(var i = 0; i < this.xRange; i++){
+		for(var i = 0; i < this.board.xRange; i++){
 			var row = document.createElement("tr");
 
-			for(var j = 0; j < this.yRange; j++){
+			for(var j = 0; j < this.board.yRange; j++){
 				var cell = document.createElement("td");
 
 				var square = document.createElement("label");
@@ -114,7 +111,7 @@ var game = {
 	},
 
 	reveal: function(xCoord, yCoord){
-		if(xCoord >= 0 && xCoord < this.xRange && yCoord >= 0 && yCoord < this.yRange){
+		if(xCoord >= 0 && xCoord < this.board.xRange && yCoord >= 0 && yCoord < this.board.yRange){
 			var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
 			var cell = this.board.grid[xCoord][yCoord];
 
@@ -130,8 +127,8 @@ var game = {
 				clickedButton.innerHTML = "X";
 				clickedButton.setAttribute("class", "mine-square");
 
-				for(var i = 0; i < this.xRange; i++){
-					for(var j = 0; j < this.yRange; j++){
+				for(var i = 0; i < this.board.xRange; i++){
+					for(var j = 0; j < this.board.yRange; j++){
 						this.reveal(i,j);
 					}
 				}
@@ -184,8 +181,8 @@ var game = {
 
 	checkForWinCondition: function(){
 		var win = true;
-		for(var i = 0; i < this.xRange; i++){
-			for(var j = 0; j < this.yRange; j++){
+		for(var i = 0; i < this.board.xRange; i++){
+			for(var j = 0; j < this.board.yRange; j++){
 				var squareToInspect = document.getElementById("row" + i + "col" + j);
 				if(this.board.grid[i][j].mine && squareToInspect.className !== "marked-square"){
 					win = false;
@@ -200,8 +197,8 @@ var game = {
 			var minesLeft = document.getElementById("minesLeft");
 			minesLeft.innerHTML = "";
 
-			for(var i = 0; i < this.xRange; i++){
-				for(var j = 0; j < this.yRange; j++){
+			for(var i = 0; i < this.board.xRange; i++){
+				for(var j = 0; j < this.board.yRange; j++){
 					if(this.board.grid[i][j].mine){
 						var squareToInspect = document.getElementById("row" + i + "col" + j);
 						squareToInspect.className = "victory-square";
