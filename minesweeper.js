@@ -130,7 +130,6 @@ Game.prototype.reveal = function(xCoord, yCoord){
 
 		if(clickedButton.className === "marked-square"){
 			this.markAsDefault(xCoord, yCoord);
-			this.board.minesToMark++;
 		}
 
 		if(cell.revealed) return;
