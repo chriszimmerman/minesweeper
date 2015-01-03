@@ -63,16 +63,11 @@ Board.prototype.getMine = function(xPos, yPos){
 	return this.grid[xPos][yPos].mine ? 1 : 0;
 };
 
-var Game = function(){};
-
-Game.prototype.startGame = function() {
-	this.board = new Board(10,10);
-	this.board.initializeBoard();
-	this.writeMineLabel();
-	this.writeBoardWithButtons();
+var GameController = function(game){
+	this.game = game;
 };
 
-Game.prototype.endGame = function() {
+GameController.prototype.cleanupView = function() {
 	var minesLeftText = document.getElementById("minesLeftText");
 	document.body.removeChild(minesLeftText);
 	var minesLeft = document.getElementById("minesLeft");
@@ -81,12 +76,7 @@ Game.prototype.endGame = function() {
 	document.body.removeChild(board);
 };
 
-Game.prototype.restartGame = function(){
-	this.endGame();
-	this.startGame();
-};
-
-Game.prototype.writeMineLabel = function() {
+GameController.prototype.writeMineLabel = function() {
 	var minesLeftText = document.createElement("label");
 	minesLeftText.id = "minesLeftText";
 	minesLeftText.innerHTML = "Mines left to mark: ";
@@ -94,8 +84,27 @@ Game.prototype.writeMineLabel = function() {
 
 	var minesLeft = document.createElement("label");
 	minesLeft.id = "minesLeft";
-	minesLeft.innerHTML = this.board.minesToMark;
+	minesLeft.innerHTML = this.game.board.minesToMark;
 	document.body.appendChild(minesLeft);
+};
+
+var Game = function(){};
+
+Game.prototype.startGame = function() {
+	this.board = new Board(10,10);
+	this.board.initializeBoard();
+	this.gameController = new GameController(this);
+	this.gameController.writeMineLabel();
+	this.writeBoardWithButtons();
+};
+
+Game.prototype.endGame = function() {
+	this.gameController.cleanupView();
+};
+
+Game.prototype.restartGame = function(){
+	this.endGame();
+	this.startGame();
 };
 
 Game.prototype.writeBoardWithButtons = function(){
