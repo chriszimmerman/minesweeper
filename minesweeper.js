@@ -212,18 +212,22 @@ Game.prototype.checkForWinCondition = function(){
 	}
 
 	if(win){
-		var minesLeftLabel = document.getElementById("minesLeftText");
-		minesLeftText.innerHTML = "YOU WIN!!";
+		this.gameController.showVictory();
+	}
+};
 
-		var minesLeft = document.getElementById("minesLeft");
-		minesLeft.innerHTML = "";
+GameController.prototype.showVictory = function(){
+	var minesLeftLabel = document.getElementById("minesLeftText");
+	minesLeftText.innerHTML = "YOU WIN!!";
 
-		for(var i = 0; i < this.board.xRange; i++){
-			for(var j = 0; j < this.board.yRange; j++){
-				if(this.board.grid[i][j].mine){
-					var squareToInspect = document.getElementById("row" + i + "col" + j);
-					squareToInspect.className = "victory-square";
-				}
+	var minesLeft = document.getElementById("minesLeft");
+	minesLeft.innerHTML = "";
+
+	for(var i = 0; i < this.game.board.xRange; i++){
+		for(var j = 0; j < this.game.board.yRange; j++){
+			if(this.game.board.grid[i][j].mine){
+				var squareToInspect = document.getElementById("row" + i + "col" + j);
+				squareToInspect.className = "victory-square";
 			}
 		}
 	}
