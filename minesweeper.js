@@ -171,6 +171,7 @@ Game.prototype.reveal = function(xCoord, yCoord){
 		}
 
 		clickedButton.removeAttribute("onclick");
+		this.checkForWinCondition();
 	}
 };
 
@@ -210,6 +211,9 @@ Game.prototype.checkForWinCondition = function(){
 		for(var j = 0; j < this.board.yRange; j++){
 			var squareToInspect = document.getElementById("row" + i + "col" + j);
 			if(this.board.grid[i][j].mine && !this.board.grid[i][j].marked){
+				win = false;
+			}
+			else if(!this.board.grid[i][j].mine && !this.board.grid[i][j].revealed){
 				win = false;
 			}
 		}
