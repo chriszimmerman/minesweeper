@@ -4,6 +4,7 @@ var Square = function(x,y){
 	this.mine = false;
 	this.adjacentMines = 0;
 	this.revealed = false;
+	this.marked = false;
 };
 
 var Board = function(length, width){
@@ -137,7 +138,7 @@ Game.prototype.reveal = function(xCoord, yCoord){
 		var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
 		var cell = this.board.grid[xCoord][yCoord];
 
-		if(clickedButton.className === "marked-square"){
+		if(cell.marked){
 			this.markAsDefault(xCoord, yCoord);
 		}
 
@@ -183,6 +184,8 @@ Game.prototype.markAsMine = function(xCoord, yCoord){
 	//ex: squareToMark.setAttribute = null;
 	squareToMark.setAttribute("onclick", "");
 	squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
+
+	this.board.grid[xCoord][yCoord].marked = true;
 	this.board.minesToMark--;
 	this.updateMinesLeft();
 	this.checkForWinCondition();
@@ -196,6 +199,7 @@ Game.prototype.markAsDefault = function(xCoord, yCoord){
 	squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
 	squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
 
+	this.board.grid[xCoord][yCoord].marked = false;
 	this.board.minesToMark++;
 	this.updateMinesLeft();
 };
@@ -205,7 +209,7 @@ Game.prototype.checkForWinCondition = function(){
 	for(var i = 0; i < this.board.xRange; i++){
 		for(var j = 0; j < this.board.yRange; j++){
 			var squareToInspect = document.getElementById("row" + i + "col" + j);
-			if(this.board.grid[i][j].mine && squareToInspect.className !== "marked-square"){
+			if(this.board.grid[i][j].mine && !this.board.grid[i][j].marked){
 				win = false;
 			}
 		}
