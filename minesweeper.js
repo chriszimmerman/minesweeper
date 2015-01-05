@@ -157,9 +157,11 @@ Game.prototype.reveal = function(xCoord, yCoord){
 		}
 		else if(cell.adjacentMines > 0){
 			clickedButton.innerHTML = cell.adjacentMines;
+			clickedButton.setAttribute("class", "revealed-square");
 		}
 		else{
 			clickedButton.innerHTML = ".";
+			clickedButton.setAttribute("class", "revealed-square");
 			this.reveal(xCoord, yCoord - 1);
 			this.reveal(xCoord, yCoord + 1);
 			this.reveal(xCoord - 1, yCoord - 1);

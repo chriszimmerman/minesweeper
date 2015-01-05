@@ -11,7 +11,11 @@ td label {
 }
 
 .unmarked-square {
-   	background-color: lightgray;
+   	background-color: gray;
+}
+
+.revealed-square {
+	background-color: lightgray;
 }
 
 .mine-square {
