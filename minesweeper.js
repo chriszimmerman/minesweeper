@@ -89,34 +89,32 @@ GameController.prototype.writeMineLabel = function() {
 	document.body.appendChild(minesLeft);
 };
 
-var Game = function(){};
+GameController.prototype.showVictory = function(){
+	var minesLeftLabel = document.getElementById("minesLeftText");
+	minesLeftText.innerHTML = "YOU WIN!!";
 
-Game.prototype.startGame = function() {
-	this.board = new Board(10,10);
-	this.board.initializeBoard();
-	this.gameController = new GameController(this);
-	this.gameController.writeMineLabel();
-	this.writeBoardWithButtons();
+	var minesLeft = document.getElementById("minesLeft");
+	minesLeft.innerHTML = "";
+
+	for(var i = 0; i < this.game.board.xRange; i++){
+		for(var j = 0; j < this.game.board.yRange; j++){
+			if(this.game.board.grid[i][j].mine){
+				var squareToInspect = document.getElementById("row" + i + "col" + j);
+				squareToInspect.className = "victory-square";
+			}
+		}
+	}
 };
 
-Game.prototype.endGame = function() {
-	this.gameController.cleanupView();
-};
-
-Game.prototype.restartGame = function(){
-	this.endGame();
-	this.startGame();
-};
-
-Game.prototype.writeBoardWithButtons = function(){
+GameController.prototype.writeBoardWithButtons = function(){
 	var board = document.createElement("table");
 	board.id = "board";
 	board.setAttribute("style", "border: 1px solid black;");
 
-	for(var i = 0; i < this.board.xRange; i++){
+	for(var i = 0; i < this.game.board.xRange; i++){
 		var row = document.createElement("tr");
 
-		for(var j = 0; j < this.board.yRange; j++){
+		for(var j = 0; j < this.game.board.yRange; j++){
 			var cell = document.createElement("td");
 
 			var square = document.createElement("label");
@@ -131,6 +129,55 @@ Game.prototype.writeBoardWithButtons = function(){
 	}
 
 	document.body.appendChild(board);
+};
+
+GameController.prototype.markAsMine = function(xCoord, yCoord){
+	if(this.game.board.grid[xCoord][yCoord].revealed) return;
+	if(this.game.board.minesToMark === 0) return;
+
+	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
+	squareToMark.setAttribute("class", "marked-square");
+	//todo: research/ask on SO: why must I call setAttribute for onclick with a blank string instead of just setting it to null?
+	//ex: squareToMark.setAttribute = null;
+	squareToMark.setAttribute("onclick", "");
+	squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
+
+	this.game.board.grid[xCoord][yCoord].marked = true;
+	this.game.board.minesToMark--;
+	this.game.updateMinesLeft();
+	this.game.checkForWinCondition();
+};
+
+GameController.prototype.markAsDefault = function(xCoord, yCoord){
+	if(this.game.board.grid[xCoord][yCoord].revealed) return;
+
+	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
+	squareToMark.setAttribute("class", "unmarked-square");
+	squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
+	squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
+
+	this.game.board.grid[xCoord][yCoord].marked = false;
+	this.game.board.minesToMark++;
+	this.game.updateMinesLeft();
+};
+
+var Game = function(){};
+
+Game.prototype.startGame = function() {
+	this.board = new Board(10,10);
+	this.board.initializeBoard();
+	this.gameController = new GameController(this);
+	this.gameController.writeMineLabel();
+	this.gameController.writeBoardWithButtons();
+};
+
+Game.prototype.endGame = function() {
+	this.gameController.cleanupView();
+};
+
+Game.prototype.restartGame = function(){
+	this.endGame();
+	this.startGame();
 };
 
 Game.prototype.reveal = function(xCoord, yCoord){
@@ -178,40 +225,17 @@ Game.prototype.reveal = function(xCoord, yCoord){
 };
 
 Game.prototype.markAsMine = function(xCoord, yCoord){
-	if(this.board.grid[xCoord][yCoord].revealed) return;
-	if(this.board.minesToMark === 0) return;
-
-	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
-	squareToMark.setAttribute("class", "marked-square");
-	//todo: research/ask on SO: why must I call setAttribute for onclick with a blank string instead of just setting it to null?
-	//ex: squareToMark.setAttribute = null;
-	squareToMark.setAttribute("onclick", "");
-	squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
-
-	this.board.grid[xCoord][yCoord].marked = true;
-	this.board.minesToMark--;
-	this.updateMinesLeft();
-	this.checkForWinCondition();
+	this.gameController.markAsMine(xCoord, yCoord);
 };
 
 Game.prototype.markAsDefault = function(xCoord, yCoord){
-	if(this.board.grid[xCoord][yCoord].revealed) return;
-
-	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
-	squareToMark.setAttribute("class", "unmarked-square");
-	squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
-	squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
-
-	this.board.grid[xCoord][yCoord].marked = false;
-	this.board.minesToMark++;
-	this.updateMinesLeft();
+	this.gameController.markAsDefault(xCoord, yCoord);
 };
 
 Game.prototype.checkForWinCondition = function(){
 	var win = true;
 	for(var i = 0; i < this.board.xRange; i++){
 		for(var j = 0; j < this.board.yRange; j++){
-			var squareToInspect = document.getElementById("row" + i + "col" + j);
 			if(this.board.grid[i][j].mine && !this.board.grid[i][j].marked){
 				win = false;
 			}
@@ -223,23 +247,6 @@ Game.prototype.checkForWinCondition = function(){
 
 	if(win){
 		this.gameController.showVictory();
-	}
-};
-
-GameController.prototype.showVictory = function(){
-	var minesLeftLabel = document.getElementById("minesLeftText");
-	minesLeftText.innerHTML = "YOU WIN!!";
-
-	var minesLeft = document.getElementById("minesLeft");
-	minesLeft.innerHTML = "";
-
-	for(var i = 0; i < this.game.board.xRange; i++){
-		for(var j = 0; j < this.game.board.yRange; j++){
-			if(this.game.board.grid[i][j].mine){
-				var squareToInspect = document.getElementById("row" + i + "col" + j);
-				squareToInspect.className = "victory-square";
-			}
-		}
 	}
 };
 
