@@ -1,10 +1,91 @@
-var Square = function(x,y){
-	this.xCoord = x;
-	this.yCoord = y;
-	this.mine = false;
-	this.adjacentMines = 0;
-	this.revealed = false;
-	this.marked = false;
+var Game = function(){};
+
+Game.prototype.startGame = function() {
+	this.board = new Board(10,10);
+	this.board.initializeBoard();
+	this.gameController = new GameController(this);
+	this.gameController.writeMineLabel();
+	this.gameController.writeBoardWithButtons();
+};
+
+Game.prototype.endGame = function() {
+	this.gameController.cleanupView();
+};
+
+Game.prototype.restartGame = function(){
+	this.endGame();
+	this.startGame();
+};
+
+Game.prototype.reveal = function(xCoord, yCoord){
+	var setMarkup = function(element, innerHTML, markup){
+		element.innerHTML = innerHTML;
+		element.setAttribute("class", markup);
+	};
+
+	if(xCoord >= 0 && xCoord < this.board.xRange && yCoord >= 0 && yCoord < this.board.yRange){
+		var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
+		var cell = this.board.grid[xCoord][yCoord];
+
+		if(cell.marked){
+			this.markAsDefault(xCoord, yCoord);
+		}
+
+		if(cell.revealed) return;
+		cell.revealed = true;
+
+		if(cell.mine){
+			setMarkup(clickedButton, "X", "mine-square");
+			for(var i = 0; i < this.board.xRange; i++){
+				for(var j = 0; j < this.board.yRange; j++){
+					this.reveal(i,j);
+				}
+			}
+		}
+		else if(cell.adjacentMines > 0){
+			setMarkup(clickedButton, cell.adjacentMines, "revealed-square");
+		}
+		else{
+			setMarkup(clickedButton, ".", "revealed-square");
+			this.reveal(xCoord, yCoord - 1);
+			this.reveal(xCoord, yCoord + 1);
+			this.reveal(xCoord - 1, yCoord - 1);
+			this.reveal(xCoord - 1, yCoord);
+			this.reveal(xCoord - 1, yCoord + 1);
+			this.reveal(xCoord + 1, yCoord - 1);
+			this.reveal(xCoord + 1, yCoord);
+			this.reveal(xCoord + 1, yCoord + 1);
+		}
+
+		clickedButton.removeAttribute("onclick");
+		this.checkForWinCondition();
+	}
+};
+
+Game.prototype.markAsPotentialMine = function(xCoord, yCoord){
+	this.gameController.markAsPotentialMine(xCoord, yCoord);
+};
+
+Game.prototype.markAsDefault = function(xCoord, yCoord){
+	this.gameController.markAsDefault(xCoord, yCoord);
+};
+
+Game.prototype.checkForWinCondition = function(){
+	var win = true;
+	for(var i = 0; i < this.board.xRange; i++){
+		for(var j = 0; j < this.board.yRange; j++){
+			if(this.board.grid[i][j].mine && !this.board.grid[i][j].marked){
+				win = false;
+			}
+			else if(!this.board.grid[i][j].mine && !this.board.grid[i][j].revealed){
+				win = false;
+			}
+		}
+	}
+
+	if(win){
+		this.gameController.showVictory();
+	}
 };
 
 var Board = function(length, width){
@@ -121,7 +202,7 @@ GameController.prototype.writeBoardWithButtons = function(){
 			square.id = "row" + i + "col" + j;
 			square.setAttribute("class", "unmarked-square");
 			square.setAttribute("onclick", "game.reveal(" + i + ", " + j + ");");
-			square.setAttribute("oncontextmenu", "game.markAsMine(" + i + ", " + j + "); return false;");
+			square.setAttribute("oncontextmenu", "game.markAsPotentialMine(" + i + ", " + j + "); return false;");
 			cell.appendChild(square);
 			row.appendChild(cell);
 		}
@@ -131,20 +212,18 @@ GameController.prototype.writeBoardWithButtons = function(){
 	document.body.appendChild(board);
 };
 
-GameController.prototype.markAsMine = function(xCoord, yCoord){
+GameController.prototype.markAsPotentialMine = function(xCoord, yCoord){
 	if(this.game.board.grid[xCoord][yCoord].revealed) return;
 	if(this.game.board.minesToMark === 0) return;
 
 	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
 	squareToMark.setAttribute("class", "marked-square");
-	//todo: research/ask on SO: why must I call setAttribute for onclick with a blank string instead of just setting it to null?
-	//ex: squareToMark.setAttribute = null;
 	squareToMark.setAttribute("onclick", "");
 	squareToMark.setAttribute("oncontextmenu", "game.markAsDefault(" + xCoord + ", " + yCoord + "); return false;");
 
 	this.game.board.grid[xCoord][yCoord].marked = true;
 	this.game.board.minesToMark--;
-	this.game.updateMinesLeft();
+	this.updateMinesLeft();
 	this.game.checkForWinCondition();
 };
 
@@ -154,105 +233,25 @@ GameController.prototype.markAsDefault = function(xCoord, yCoord){
 	var squareToMark = document.getElementById("row" + xCoord + "col" + yCoord);
 	squareToMark.setAttribute("class", "unmarked-square");
 	squareToMark.setAttribute("onclick", "game.reveal(" + xCoord + ", " + yCoord + ");");
-	squareToMark.setAttribute("oncontextmenu", "game.markAsMine(" + xCoord + ", " + yCoord + "); return false;");
+	squareToMark.setAttribute("oncontextmenu", "game.markAsPotentialMine(" + xCoord + ", " + yCoord + "); return false;");
 
 	this.game.board.grid[xCoord][yCoord].marked = false;
 	this.game.board.minesToMark++;
-	this.game.updateMinesLeft();
+	this.updateMinesLeft();
 };
 
-var Game = function(){};
-
-Game.prototype.startGame = function() {
-	this.board = new Board(10,10);
-	this.board.initializeBoard();
-	this.gameController = new GameController(this);
-	this.gameController.writeMineLabel();
-	this.gameController.writeBoardWithButtons();
-};
-
-Game.prototype.endGame = function() {
-	this.gameController.cleanupView();
-};
-
-Game.prototype.restartGame = function(){
-	this.endGame();
-	this.startGame();
-};
-
-Game.prototype.reveal = function(xCoord, yCoord){
-	if(xCoord >= 0 && xCoord < this.board.xRange && yCoord >= 0 && yCoord < this.board.yRange){
-		var clickedButton = document.getElementById("row" + xCoord + "col" + yCoord);
-		var cell = this.board.grid[xCoord][yCoord];
-
-		if(cell.marked){
-			this.markAsDefault(xCoord, yCoord);
-		}
-
-		if(cell.revealed) return;
-		cell.revealed = true;
-
-		if(cell.mine){
-			clickedButton.innerHTML = "X";
-			clickedButton.setAttribute("class", "mine-square");
-
-			for(var i = 0; i < this.board.xRange; i++){
-				for(var j = 0; j < this.board.yRange; j++){
-					this.reveal(i,j);
-				}
-			}
-		}
-		else if(cell.adjacentMines > 0){
-			clickedButton.innerHTML = cell.adjacentMines;
-			clickedButton.setAttribute("class", "revealed-square");
-		}
-		else{
-			clickedButton.innerHTML = ".";
-			clickedButton.setAttribute("class", "revealed-square");
-			this.reveal(xCoord, yCoord - 1);
-			this.reveal(xCoord, yCoord + 1);
-			this.reveal(xCoord - 1, yCoord - 1);
-			this.reveal(xCoord - 1, yCoord);
-			this.reveal(xCoord - 1, yCoord + 1);
-			this.reveal(xCoord + 1, yCoord - 1);
-			this.reveal(xCoord + 1, yCoord);
-			this.reveal(xCoord + 1, yCoord + 1);
-		}
-
-		clickedButton.removeAttribute("onclick");
-		this.checkForWinCondition();
-	}
-};
-
-Game.prototype.markAsMine = function(xCoord, yCoord){
-	this.gameController.markAsMine(xCoord, yCoord);
-};
-
-Game.prototype.markAsDefault = function(xCoord, yCoord){
-	this.gameController.markAsDefault(xCoord, yCoord);
-};
-
-Game.prototype.checkForWinCondition = function(){
-	var win = true;
-	for(var i = 0; i < this.board.xRange; i++){
-		for(var j = 0; j < this.board.yRange; j++){
-			if(this.board.grid[i][j].mine && !this.board.grid[i][j].marked){
-				win = false;
-			}
-			else if(!this.board.grid[i][j].mine && !this.board.grid[i][j].revealed){
-				win = false;
-			}
-		}
-	}
-
-	if(win){
-		this.gameController.showVictory();
-	}
-};
-
-Game.prototype.updateMinesLeft = function() {
+GameController.prototype.updateMinesLeft = function() {
 	var minesLeft = document.getElementById("minesLeft");
-	minesLeft.innerHTML = this.board.minesToMark;
+	minesLeft.innerHTML = this.game.board.minesToMark;
+};
+
+var Square = function(x,y){
+	this.xCoord = x;
+	this.yCoord = y;
+	this.mine = false;
+	this.adjacentMines = 0;
+	this.revealed = false;
+	this.marked = false;
 };
 
 var game = new Game();
